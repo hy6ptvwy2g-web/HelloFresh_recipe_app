@@ -5,23 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>HelloFresh ➡️ Paprika</title>
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Cropper.js -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+    <!-- Pako (GZIP) für Paprika-Format -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
 
     <style>
-        body { -webkit-tap-highlight-color: transparent; background-color: #f3f4f6; }
-        .cropper-container { width: 100% !important; max-height: 400px; }
+        /* Verhindert Pull-to-Refresh und wildes Scrollen beim Croppen auf iOS */
+        body { 
+            -webkit-tap-highlight-color: transparent; 
+            background-color: #f3f4f6; 
+            overscroll-behavior-y: none;
+        }
+        .cropper-container { width: 100% !important; max-height: 400px; touch-action: none; }
         img { display: block; max-width: 100%; }
         .success-bg { background-color: #ecfdf5; border-color: #34d399; color: #065f46; }
+        /* Versteckt das Gitter im Cropper für einen cleaneren Look */
+        .cropper-center { display: none; }
     </style>
 </head>
 <body class="text-gray-800 p-4 font-sans antialiased max-w-lg mx-auto">
     
     <div class="text-center mb-6">
         <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">🍋 HelloFresh</h1>
-        <p class="text-sm font-medium text-gray-500 mt-1">Export zu Paprika 3 (v12 - Full Vision Fix)</p>
+        <p class="text-sm font-medium text-gray-500 mt-1">Export zu Paprika 3 (v15 - Pro UX)</p>
     </div>
     
     <div class="bg-white p-5 rounded-2xl shadow-sm mb-5 border border-gray-100">
@@ -29,23 +39,26 @@
         <input type="password" id="apiKey" placeholder="AIzaSy..." class="w-full p-3 border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-green-400 outline-none transition-all">
     </div>
 
+    <!-- 1. Vorderseite -->
     <div class="bg-white p-5 rounded-2xl shadow-sm mb-5 border border-gray-100">
-        <label class="block text-sm font-bold text-gray-700 mb-2">1️⃣ Vorderseite (Ganze Karte fotografieren)</label>
-        <input type="file" id="frontImage" accept="image/*" capture="environment" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 mb-3 cursor-pointer">
+        <label class="block text-sm font-bold text-gray-700 mb-2">1️⃣ Vorderseite (Foto oder Mediathek)</label>
+        <input type="file" id="frontImage" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 mb-3 cursor-pointer">
         
         <div id="cropperWrapper" class="hidden mt-3 border border-gray-200 rounded-xl overflow-hidden bg-gray-50">
             <img id="imageToCrop" src="">
-            <div class="p-2 text-xs text-center text-gray-500 bg-white">
-                Schiebe das Quadrat über das Essen (nur für das Paprika-Thumbnail). <br><b>Die KI liest trotzdem die ganze Karte!</b>
+            <div class="p-3 text-xs text-center text-gray-600 bg-white border-t border-gray-100">
+                <b>Verschiebe und zoome das Bild</b> mit den Fingern, bis das Gericht im Rahmen sitzt.<br>(Die KI liest trotzdem den ganzen Text!)
             </div>
         </div>
     </div>
 
+    <!-- 2. Rückseite -->
     <div class="bg-white p-5 rounded-2xl shadow-sm mb-6 border border-gray-100">
-        <label class="block text-sm font-bold text-gray-700 mb-2">2️⃣ Rückseite (Ganze Karte fotografieren)</label>
-        <input type="file" id="backImage" accept="image/*" capture="environment" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 cursor-pointer">
+        <label class="block text-sm font-bold text-gray-700 mb-2">2️⃣ Rückseite (Foto oder Mediathek)</label>
+        <input type="file" id="backImage" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 cursor-pointer">
     </div>
 
+    <!-- Buttons -->
     <div id="buttonContainer">
         <button id="generateBtn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-4 rounded-2xl shadow-lg shadow-green-200 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
@@ -54,7 +67,7 @@
 
         <button id="downloadBtn" class="hidden w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-4 rounded-2xl shadow-lg shadow-blue-200 transition-all active:scale-95 flex items-center justify-center gap-2 mt-3">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-            Datei in Paprika öffnen
+            Datei laden (In Paprika öffnen)
         </button>
     </div>
     
@@ -86,7 +99,7 @@
                 img.src = e.target.result;
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 1200; 
+                    const MAX_WIDTH = 1400; // Genug Auflösung für sauberen Text
                     let width = img.width;
                     let height = img.height;
                     if (width > MAX_WIDTH) {
@@ -104,7 +117,6 @@
             reader.onerror = error => reject(error);
         });
 
-        // Holt nur den quadratischen Ausschnitt für das Paprika Thumbnail
         const getCroppedBase64 = () => {
             if (!cropper) return null;
             const canvas = cropper.getCroppedCanvas({ width: 800, height: 800 });
@@ -119,7 +131,7 @@
             });
         };
 
-        // Zeigt das Bild im Cropper an, behält aber das Original-File im Input
+        // Cropper im Instagram-Modus starten
         frontInput.addEventListener('change', (e) => {
             if (e.target.files && e.target.files[0]) {
                 const reader = new FileReader();
@@ -127,8 +139,16 @@
                     imageToCrop.src = event.target.result;
                     cropperWrapper.classList.remove('hidden');
                     if (cropper) cropper.destroy();
+                    
+                    // V15 FIX: Fester Rahmen, Bild lässt sich dahinter bewegen!
                     cropper = new Cropper(imageToCrop, {
-                        aspectRatio: 1, viewMode: 1, autoCropArea: 0.8, background: false
+                        aspectRatio: 1, 
+                        viewMode: 1, 
+                        dragMode: 'move', // Erlaubt das Pannen des Bildes
+                        cropBoxMovable: false, // Box ist fixiert
+                        cropBoxResizable: false, // Box kann nicht skaliert werden
+                        toggleDragModeOnDblclick: false,
+                        background: false
                     });
                 };
                 reader.readAsDataURL(e.target.files[0]);
@@ -144,35 +164,35 @@
             generateBtn.disabled = true;
             statusDiv.style.display = 'block';
             statusDiv.className = 'mt-5 p-4 text-center text-sm font-medium text-gray-700 bg-blue-50 border border-blue-100 rounded-xl';
-            statusDiv.textContent = '🧠 Analysiere Rezept (Gemini 2.5 Pro)... Bitte warten...';
+            statusDiv.textContent = '🧠 Analysiere Rezept (Gemini Pro)... Bitte warten...';
 
             try {
-                // DER ENTSCHEIDENDE FIX: 
-                // Wir schicken der KI das VOLLE, ungeschnittene Bild der Vorderseite!
+                // Volles Bild für die schlaue KI
                 const fullFrontBase64 = await getResizedBase64(frontInput.files[0]);
                 const fullBackBase64 = await getResizedBase64(backInput.files[0]);
                 
-                // Dieses Bild ist nur für die Paprika-Datei
+                // Quadratisches Bild nur für die Paprika Datenbank
                 const thumbnailBase64 = getCroppedBase64();
 
-                const prompt = `Du bist ein extrem präziser Daten-Extraktor für Rezeptkarten. Deine Aufgabe ist das fehlerfreie Abtippen, NICHT das Erfinden!
+                const prompt = `Du bist ein präziser Rezept-Scanner. Tippe exakt ab, was gedruckt ist.
 
 REGELN:
-1. TITEL: Lies den Haupttitel und den Untertitel von der Vorderseite. Kombiniere sie zu einem Rezeptnamen. Ignoriere Markenlogos oder Wörter wie "HelloFresh".
-2. ZUTATEN: Lies AUSSCHLIESSLICH aus der "Zutaten"-Tabelle (Spalte 2P) und den "Basiszutaten aus Deiner Küche" auf der Rückseite. 
-   - Kombiniere Menge und Zutatenname logisch.
-   - Wenn dort steht "1 Knoblauchzehe", schreib das. Erfinde NICHTS dazu. Lass keine Zutat weg.
+1. TITEL: Lies Titel & Untertitel (Vorderseite). Ignoriere HelloFresh oder andere Markenwörter.
+2. ZUTATEN: Nutze NUR die gedruckte Liste unter "Zutaten" (Spalte 2P) und "Basiszutaten aus Deiner Küche" (Rückseite). 
+   - Kombiniere Menge und Zutat logisch.
+   - Wenn dort steht "1 Knoblauchzehe", schreibe genau das. 
+   - Erfinde NICHTS dazu.
 3. ZUBEREITUNG:
-   - Trenne jeden Arbeitsschritt zwingend mit ZWEI Zeilenumbrüchen (\\n\\n).
-   - JEDES Mal, wenn eine der Zutaten im Text erwähnt wird, setze sie in Sternchen (z.B. **Öl**, **Sojasoße**).
-4. ZEIT: Lies die exakte Zeitangabe von der Vorderseite (z.B. "25 - 35 Min") ab.
+   - Formatiere Zutaten im Text immer mit Sternchen (z.B. **Öl**, **Sojasoße**).
+   - Trenne jeden einzelnen Arbeitsschritt zwingend mit ZWEI Zeilenumbrüchen (\\n\\n).
+4. ZEIT: Lies die Zeit von der Vorderseite (z.B. "25 - 35 Min").
 
 Gib AUSSCHLIESSLICH das fertige JSON zurück:
 {
-  "name": "Titel ohne Marken",
+  "name": "Gerichtname ohne Marke",
   "ingredients": "Menge Zutat 1\\nMenge Zutat 2\\n...",
   "directions": "1. **Zutat A** vorbereiten...\\n\\n2. In einer Pfanne **Öl** erhitzen...",
-  "prep_time": "Zeitangabe",
+  "prep_time": "Zeit",
   "cook_time": "",
   "servings": "2",
   "nutritional_info": "",
@@ -192,20 +212,27 @@ Gib AUSSCHLIESSLICH das fertige JSON zurück:
                     generationConfig: { responseMimeType: "application/json" }
                 };
 
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`, {
+                // KORREKTES VERFÜGBARES MODELL FÜR DIE API
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
                 const data = await response.json();
-                if (!response.ok || data.error) throw new Error(data.error?.message || "API Fehler");
+                
+                if (!response.ok || data.error) {
+                    if (data.error?.message.includes("Quota") || data.error?.message.includes("429")) {
+                        throw new Error("Google Spam-Schutz: Bitte warte kurz, bevor du das nächste Rezept einscannst.");
+                    }
+                    throw new Error(data.error?.message || "API Fehler");
+                }
 
                 const jsonText = data.candidates[0].content.parts[0].text;
                 const recipeData = JSON.parse(jsonText);
                 
                 recipeData.uid = generateUUID();
-                recipeData.photo_data = thumbnailBase64; // Hier packen wir das kleine Quadrat rein!
+                recipeData.photo_data = thumbnailBase64; 
                 recipeData.photo = recipeData.uid + ".jpg"; 
                 recipeData.categories = ["HelloFresh"];
                 
@@ -223,7 +250,7 @@ Gib AUSSCHLIESSLICH das fertige JSON zurück:
                 downloadBtn.classList.remove('hidden');
 
                 statusDiv.className = 'mt-5 p-4 text-center text-sm font-bold success-bg border rounded-xl';
-                statusDiv.textContent = '✅ Perfekt! Klicke auf den Button, um das Rezept in Paprika zu öffnen.';
+                statusDiv.textContent = '✅ Perfekt! Klicke auf den Button, um das Rezept herunterzuladen und in Paprika zu öffnen.';
                 
             } catch (error) {
                 console.error(error);
@@ -233,7 +260,6 @@ Gib AUSSCHLIESSLICH das fertige JSON zurück:
             }
         });
 
-        // Nativer Safari Download -> Erzeugt das iOS Popup "Möchtest du XY laden?" -> Öffnet sofort Paprika
         downloadBtn.addEventListener('click', () => {
             const url = URL.createObjectURL(finalRecipeFile);
             const a = document.createElement("a");
